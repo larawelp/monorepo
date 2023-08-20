@@ -48,6 +48,9 @@ then
 fi
 
 # Tag Framework
+git push --delete origin $VERSION || echo "Tag does not exist on origin."
+# delete tag locally
+git tag -d $VERSION || echo "Tag does not exist locally."
 git tag $VERSION
 git push origin --tags
 
@@ -60,7 +63,7 @@ do
     echo "Releasing $REMOTE";
 
     TMP_DIR="/tmp/larawelp-split"
-    REMOTE_URL="git@github.com:larawelp/$REMOTE.git"
+    REMOTE_URL="git@github.com:larawelp/$lowercaseRemote.git"
 
     rm -rf $TMP_DIR;
     mkdir $TMP_DIR;
@@ -70,6 +73,11 @@ do
 
         git clone $REMOTE_URL .
         git checkout "$RELEASE_BRANCH";
+
+        # if the tag already exists on origin, delete it first
+        git push --delete origin $VERSION || echo "Tag does not exist on origin."
+        # delete tag locally
+        git tag -d $VERSION || echo "Tag does not exist locally."
 
         git tag $VERSION
         git push origin --tags
