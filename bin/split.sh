@@ -4,7 +4,7 @@ set -e
 set -x
 
 CURRENT_BRANCH="0.x"
-REPOS="Contracts Foundation Options Pagination Support Theme"
+REPOS="Contracts Foundation Options Pagination Support" # Theme
 
 CWD=$(pwd)
 
