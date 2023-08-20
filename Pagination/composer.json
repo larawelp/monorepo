@@ -1,43 +1,47 @@
 {
-    "name": "larawelp/pagination",
-    "description": "A simple library for generating pagination for LaraWelP",
-    "keywords": [
-        "framework",
-        "laravel",
-        "wordpress",
-        "larawelp"
-    ],
-    "license": "MIT",
-    "homepage": "https://github.com/larawelp/pagination",
-    "support": {
-        "issues": "https://github.com/larawelp/pagination/issues",
-        "source": "https://github.com/larawelp/pagination"
-    },
-    "authors": [
-        {
-            "name": "filipac",
-            "email": "filip@pacurar.dev"
-        }
-    ],
-    "require": {
-        "php": "^8.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "LaraWelP\\Pagination\\": "./"
-        }
-    },
-    "scripts": {
-        "fix-cs": ["prettier **/*.php --write"]
-    },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/larawelp/contracts"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/larawelp/support"
-        }
+  "name": "larawelp/pagination",
+  "description": "A simple library for generating pagination for LaraWelP",
+  "keywords": [
+    "framework",
+    "laravel",
+    "wordpress",
+    "larawelp"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/larawelp/pagination",
+  "support": {
+    "issues": "https://github.com/larawelp/pagination/issues",
+    "source": "https://github.com/larawelp/pagination"
+  },
+  "authors": [
+    {
+      "name": "filipac",
+      "email": "filip@pacurar.dev"
+    }
+  ],
+  "require": {
+    "php": "^8.0",
+    "larawelp/contracts": "^0.0",
+    "larawelp/support": "^0.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "LaraWelP\\Pagination\\": "./"
+    }
+  },
+  "scripts": {
+    "fix-cs": [
+      "prettier **/*.php --write"
     ]
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/larawelp/contracts"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/larawelp/support"
+    }
+  ]
 }

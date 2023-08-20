@@ -7,9 +7,18 @@
         }
     ],
     "require": {},
+    "replace": {
+        "larawelp/contracts": "self.version",
+        "larawelp/options": "self.version",
+        "larawelp/pagination": "self.version",
+        "larawelp/support": "self.version"
+    },
     "autoload": {
         "psr-4": {
             "LaraWelP\\": "./"
-        }
+        },
+        "files": [
+            "./Foundation/helpers.php"
+        ]
     }
 }

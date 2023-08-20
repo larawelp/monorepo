@@ -4,7 +4,7 @@ set -e
 set -x
 
 CURRENT_BRANCH="0.x"
-REPOS="Contracts Framework Options Pagination Support Theme"
+REPOS="Contracts Foundation Options Pagination Support Theme"
 
 CWD=$(pwd)
 
@@ -34,9 +34,9 @@ function split()
 
   git clone "$CWD" "/tmp/split/$lowercaseApp"
   cd "/tmp/split/$lowercaseApp"
-  git checkout -b $CURRENT_BRANCH
+#  git checkout -b $CURRENT_BRANCH
   git checkout -b $RANDOM_BRANCH
-  remote $1 $2
+  remote $lowercaseApp git@github.com:larawelp/$lowercaseApp.git
   git filter-repo --subdirectory-filter=$app --force
   git push  $lowercaseApp $CURRENT_BRANCH --force
 
