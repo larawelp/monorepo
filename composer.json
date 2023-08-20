@@ -1,0 +1,15 @@
+{
+    "name": "larawelp/all",
+    "authors": [
+        {
+            "name": "Filip Pacurar",
+            "email": "filip@pacurar.dev"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "LaraWelP\\": "./"
+        }
+    }
+}

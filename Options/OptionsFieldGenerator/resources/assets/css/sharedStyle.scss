@@ -1,0 +1,55 @@
+.larawelp-show-if-value, .larawelp-show-if-value--inline-block {
+    display: none;
+}
+
+.larawelp-hide-if-value {
+    display: block;
+}
+
+.larawelp-has-value {
+    .larawelp-show-if-value {
+        display: block;
+    }
+    .larawelp-show-if-value--inline-block {
+        display: inline-block;
+    }
+    .larawelp-hide-if-value {
+        display: none;
+    }
+}
+
+.larawelp-flex-line {
+    display: inline-flex;
+    width: 100%;
+}
+
+.larawelp-input-group {
+    display: flex;
+}
+
+.larawelp-input-group-addon {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    &:first-child {
+        padding-right: 0.5rem;
+    }
+    &:last-child {
+        padding-left: 0.5rem;
+    }
+}
+
+.larawelp-help-link {
+    display: flex;
+    align-items: center;
+    padding: 0 0.5rem;
+    color: currentColor;
+    opacity: 0.5;
+    &:hover {
+        opacity: 1;
+    }
+}
+

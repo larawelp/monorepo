@@ -1,0 +1,37 @@
+{
+    "name": "larawelp/framework",
+    "description": "The LaraWelP theme framework for WordPress.",
+    "keywords": [
+        "framework",
+        "laravel",
+        "wordpress"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/larawelp/theme",
+    "support": {
+        "issues": "https://github.com/larawelp/theme/issues",
+        "source": "https://github.com/larawelp/theme"
+    },
+    "authors": [
+        {
+            "name": "filipac",
+            "email": "filip@pacurar.net"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "laravel/framework": "^10.0",
+        "illuminate/contracts": "^10.0"
+    },
+    "autoload": {
+        "files": [
+            "Foundation/helpers.php"
+        ],
+        "psr-4": {
+            "LaraWelP\\": "./"
+        }
+    },
+    "scripts": {
+        "fix-cs": ["prettier **/*.php --write"]
+    }
+}

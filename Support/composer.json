@@ -1,0 +1,39 @@
+{
+    "name": "larawelp/support",
+    "description": "The LaraWelP Support Package",
+    "keywords": [
+        "framework",
+        "laravel",
+        "wordpress",
+        "larawelp"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/larawelp/support",
+    "support": {
+        "issues": "https://github.com/larawelp/support/issues",
+        "source": "https://github.com/larawelp/support"
+    },
+    "authors": [
+        {
+            "name": "filipac",
+            "email": "filip@pacurar.dev"
+        }
+    ],
+    "require": {
+        "php": "^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "LaraWelP\\Support\\": "./"
+        }
+    },
+    "scripts": {
+        "fix-cs": ["prettier **/*.php --write"]
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/larawelp/contracts"
+        }
+    ]
+}

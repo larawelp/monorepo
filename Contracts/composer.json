@@ -1,0 +1,33 @@
+{
+    "name": "larawelp/contracts",
+    "description": "The Larawelp Contracts.",
+    "keywords": [
+        "framework",
+        "laravel",
+        "wordpress",
+        "larawelp"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/larawelp/contracts",
+    "support": {
+        "issues": "https://github.com/larawelp/contracts/issues",
+        "source": "https://github.com/larawelp/contracts"
+    },
+    "authors": [
+        {
+            "name": "filipac",
+            "email": "filip@pacurar.dev"
+        }
+    ],
+    "require": {
+        "php": "^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "LaraWelP\\Contracts\\": "./"
+        }
+    },
+    "scripts": {
+        "fix-cs": ["prettier **/*.php --write"]
+    }
+}
