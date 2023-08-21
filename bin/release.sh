@@ -108,6 +108,19 @@ do
         git clone $REMOTE_URL .
         git checkout "$RELEASE_BRANCH";
 
+        remoteTagExists=$(git ls-remote --tags origin $VERSION | wc -l | xargs)
+        echo "Remote tag exists: $remoteTagExists"
+        # if there are no changes in current branch VS remote branch, skip re-doing the tag to save time
+        if [[ $remoteTagExists == 1 ]]; then
+          echo "Remote tag $VERSION exists, checking if it is the same"
+          numberOfChanges=$(git rev-list --count $VERSION..refs/tags/$VERSION)
+          echo "Number of changes: $numberOfChanges"
+          if [[ $numberOfChanges == 0 ]]; then
+            echo "Tag $VERSION already exists on $REMOTE_URL and there are no changes in current branch VS remote tag. Skipping..."
+            continue
+          fi
+        fi
+
         # if the tag already exists on origin, delete it first
         git push --delete origin $VERSION || echo "Tag does not exist on origin."
         # delete tag locally
