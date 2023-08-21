@@ -46,6 +46,11 @@ function split()
 #  git checkout $CURRENT_BRANCH
 }
 
+# allow overwriting REPOS from command line
+if [ -n "$1" ]; then
+  REPOS=$1
+fi
+
 
 
 #git pull origin $CURRENT_BRANCH
