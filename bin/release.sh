@@ -5,8 +5,9 @@ set -e
 VERSION=0
 REPO_PATH=0
 IGNORE_DIRTY=0
+IS_MINOR=0
 
-while getopts ":r:t:i" option; do
+while getopts ":r:t:i:m" option; do
    case $option in
       r) # set REPO_PATH
           REPO_PATH=$OPTARG
@@ -16,6 +17,9 @@ while getopts ":r:t:i" option; do
           ;;
       i) # set IGNORE_DIRTY
           IGNORE_DIRTY=1
+          ;;
+      m) # set IS_MINOR
+          IS_MINOR=1
           ;;
       \?) # Invalid option
          echo "Error: Invalid option"
@@ -31,6 +35,8 @@ if [ $VERSION == 0 ]; then
   echo "Error: No version specified"
   exit 1
 fi
+
+echo "Releasing a minor version ?: $IS_MINOR"
 
 #echo $VERSION;
 #echo $REPO_PATH;
@@ -78,15 +84,53 @@ then
     VERSION="v$VERSION"
 fi
 
+UPDATE_FRAMEWORK=0
+
 #echo $VERSION;
 #exit 0;
 
 # Tag Framework
-git push --delete origin $VERSION || echo "Tag does not exist on origin."
-# delete tag locally
-git tag -d $VERSION || echo "Tag does not exist locally."
-git tag $VERSION
-git push origin --tags
+tagExists=$(git tag --list | grep $VERSION | wc -l | xargs)
+echo "Tag exists: $tagExists"
+if [[ $tagExists == 1 ]]; then
+  echo "Tag $VERSION exists, checking if it is the same"
+  numberOfChanges=$(git diff $RELEASE_BRANCH..refs/tags/$VERSION | wc -l | xargs)
+  echo "Number of changes: $numberOfChanges"
+  if [[ $numberOfChanges == 0 ]]; then
+    echo "Tag $VERSION already exists and there are no changes in current branch VS remote tag. Skipping..."
+  fi
+  if [[ $numberOfChanges != 0 ]]; then
+    git push --delete origin $VERSION || echo "Tag does not exist on origin."
+    # delete tag locally
+    git tag -d $VERSION || echo "Tag does not exist locally."
+    git tag $VERSION
+    git push origin --tags
+  fi
+fi
+
+# for now always tag the framework
+if [[ $tagExists == 1 ]]; then
+  git tag $VERSION
+  git push origin --tags
+fi
+
+#if [[ $tagExists == 0 ]]; then
+#  # if tag exists and IS_MINOR is 1, compare working directory with latest tag and if there are no changes, skip tagging
+#  if [[ $IS_MINOR == 1 ]]; then
+#    echo "Tag $VERSION does not exist, checking if it is the same as latest tag"
+#    latestTag=$(git describe --tags `git rev-list --tags --max-count=1`)
+#    echo "Latest tag: $latestTag"
+#    numberOfChanges=$(git diff $latestTag | wc -l | xargs)
+#    echo "Number of changes: $numberOfChanges"
+#    if [[ $numberOfChanges == 0 ]]; then
+#      echo "Tag $VERSION already exists and there are no changes in current branch VS remote tag. Skipping..."
+#    fi
+#    if [[ $numberOfChanges != 0 ]]; then
+#      git tag $VERSION
+#      git push origin --tags
+#    fi
+#  fi
+#fi
 
 # Tag Components
 for REMOTE in Contracts Foundation Options Pagination Support
@@ -108,16 +152,31 @@ do
         git clone $REMOTE_URL .
         git checkout "$RELEASE_BRANCH";
 
-        remoteTagExists=$(git ls-remote --tags origin $VERSION | wc -l | xargs)
-        echo "Remote tag exists: $remoteTagExists"
+        tagExists=$(git tag --list | grep $VERSION | wc -l | xargs)
+        echo "Tag exists: $tagExists"
         # if there are no changes in current branch VS remote branch, skip re-doing the tag to save time
-        if [[ $remoteTagExists == 1 ]]; then
-          echo "Remote tag $VERSION exists, checking if it is the same"
-          numberOfChanges=$(git rev-list --count $VERSION..refs/tags/$VERSION)
+        if [[ $tagExists == 1 ]]; then
+          echo "Tag $VERSION exists, checking if it is the same"
+          numberOfChanges=$(git diff $RELEASE_BRANCH..refs/tags/$VERSION | wc -l | xargs)
           echo "Number of changes: $numberOfChanges"
           if [[ $numberOfChanges == 0 ]]; then
             echo "Tag $VERSION already exists on $REMOTE_URL and there are no changes in current branch VS remote tag. Skipping..."
             continue
+          fi
+        fi
+
+        if [[ $tagExists == 0 ]]; then
+          # if tag exists and IS_MINOR is 1, compare working directory with latest tag and if there are no changes, skip tagging
+          if [[ $IS_MINOR == 1 ]]; then
+            echo "Tag $VERSION does not exist, checking if it is the same as latest tag"
+            latestTag=$(git describe --tags `git rev-list --tags --max-count=1`)
+            echo "Latest tag: $latestTag"
+            numberOfChanges=$(git diff $latestTag | wc -l | xargs)
+            echo "Number of changes: $numberOfChanges"
+            if [[ $numberOfChanges == 0 ]]; then
+              echo "Tag $VERSION already exists on $REMOTE_URL and there are no changes in current branch VS remote tag. Skipping..."
+              continue
+            fi
           fi
         fi
 
