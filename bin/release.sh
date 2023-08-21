@@ -27,6 +27,29 @@ while getopts ":r:t:i:m" option; do
    esac
 done
 
+# ask user if the split command has been run, if not, exit
+hasRunSplit=0
+validInput=0
+
+while [ $validInput == 0 ]
+do
+  echo "Did you run the split command? (y/n)"
+  read -r -n 1 -s hasRunSplit
+  if [[ $hasRunSplit == "y" ]]; then
+    hasRunSplit=1
+    validInput=1
+  fi
+  if [[ $hasRunSplit == "n" ]]; then
+    hasRunSplit=0
+    validInput=1
+  fi
+done
+
+if [[ $hasRunSplit == 0 ]]; then
+  echo "Please run the split command first."
+  exit 1
+fi
+
 # get absolute path to this script's directory
 ABS_PATH_TO_THIS_SCRIPT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
