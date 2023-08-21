@@ -109,7 +109,7 @@ if [[ $tagExists == 1 ]]; then
 fi
 
 # for now always tag the framework
-if [[ $tagExists == 1 ]]; then
+if [[ $tagExists == 0 ]]; then
   git tag $VERSION
   git push origin --tags
 fi
