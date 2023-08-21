@@ -57,7 +57,7 @@ then
     if [[ $IGNORE_DIRTY == 0 ]]; then
       echo "Your working directory is dirty. Did you forget to commit your changes?"
 
-      exit 1;
+#      exit 1;
     fi
 fi
 
@@ -82,11 +82,24 @@ fi
 #exit 0;
 
 # Tag Framework
-git push --delete origin $VERSION || echo "Tag does not exist on origin."
-# delete tag locally
-git tag -d $VERSION || echo "Tag does not exist locally."
-git tag $VERSION
-git push origin --tags
+tagExists=$(git tag --list | grep $VERSION | wc -l | xargs)
+echo "Tag exists: $tagExists"
+if [[ $tagExists == 1 ]]; then
+  echo "Tag $VERSION exists, checking if it is the same"
+  numberOfChanges=$(git diff $RELEASE_BRANCH..refs/tags/$VERSION | wc -l | xargs)
+  echo "Number of changes: $numberOfChanges"
+  if [[ $numberOfChanges == 0 ]]; then
+    echo "Tag $VERSION already exists and there are no changes in current branch VS remote tag. Skipping..."
+  fi
+  if [[ $numberOfChanges != 0 ]]; then
+    git push --delete origin $VERSION || echo "Tag does not exist on origin."
+    # delete tag locally
+    git tag -d $VERSION || echo "Tag does not exist locally."
+    git tag $VERSION
+    git push origin --tags
+  fi
+fi
+exit 0;
 
 # Tag Components
 for REMOTE in Contracts Foundation Options Pagination Support
@@ -108,12 +121,14 @@ do
         git clone $REMOTE_URL .
         git checkout "$RELEASE_BRANCH";
 
-        remoteTagExists=$(git ls-remote --tags origin $VERSION | wc -l | xargs)
-        echo "Remote tag exists: $remoteTagExists"
+#        remoteTagExists=$(git ls-remote --tags origin $VERSION | wc -l | xargs)
+#        echo "Remote tag exists: $remoteTagExists"
+        tagExists=$(git tag --list | grep $VERSION | wc -l | xargs)
+        echo "Tag exists: $tagExists"
         # if there are no changes in current branch VS remote branch, skip re-doing the tag to save time
-        if [[ $remoteTagExists == 1 ]]; then
-          echo "Remote tag $VERSION exists, checking if it is the same"
-          numberOfChanges=$(git rev-list --count $VERSION..refs/tags/$VERSION)
+        if [[ $tagExists == 1 ]]; then
+          echo "Tag $VERSION exists, checking if it is the same"
+          numberOfChanges=$(git diff $RELEASE_BRANCH..refs/tags/$VERSION | wc -l | xargs)
           echo "Number of changes: $numberOfChanges"
           if [[ $numberOfChanges == 0 ]]; then
             echo "Tag $VERSION already exists on $REMOTE_URL and there are no changes in current branch VS remote tag. Skipping..."
