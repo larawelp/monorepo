@@ -1,17 +1,58 @@
 #!/usr/bin/env bash
 
 set -e
-set -x
+#set -x
 
 CURRENT_BRANCH="0.x"
 REPOS="Contracts Foundation Options Pagination Support Theme"
 
+ALSO_TAG=0
+
 CWD=$(pwd)
+
+############################################################
+# Help                                                     #
+############################################################
+Help()
+{
+   # Display Help
+   echo "Add description of the script functions here."
+   echo
+   echo "Syntax: scriptTemplate [-g|h|v|V]"
+   echo "options:"
+   echo "h     Print this Help."
+   echo "r     Repos to split."
+   echo "t     Also tag the split repos."
+   echo
+}
+
+while getopts ":h:r:t:" option; do
+   case $option in
+      h) # display Help
+         Help
+         exit 0;;
+      r) # display Help
+          REPOS=$OPTARG
+          ;;
+      t) # set ALSO_TAG
+          ALSO_TAG=$OPTARG
+          if [[ $ALSO_TAG != v*  ]]
+          then
+              ALSO_TAG="v$ALSO_TAG"
+          fi
+          ;;
+      \?) # Invalid option
+         echo "Error: Invalid option"
+         exit;;
+   esac
+done
 
 function remote()
 {
     git remote add $1 $2 || true
 }
+
+ABS_PATH_TO_THIS_SCRIPT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )";
 
 function split()
 {
@@ -34,11 +75,22 @@ function split()
 
   git clone "$CWD" "/tmp/split/$lowercaseApp"
   cd "/tmp/split/$lowercaseApp"
-#  git checkout -b $CURRENT_BRANCH
+  git checkout -b $CURRENT_BRANCH || true
   git checkout -b $RANDOM_BRANCH
   remote $lowercaseApp git@github.com:larawelp/$lowercaseApp.git
   git filter-repo --subdirectory-filter=$app --force
   git push  $lowercaseApp $CURRENT_BRANCH --force
+
+  # if $ALSO_TAG is not, tag the repo with $ALSO_TAG
+    echo "ALSO TAG $ALSO_TAG"
+  if [ $ALSO_TAG != 0 ]; then
+    # get absolute path to this script's directory
+#    git checkout -b $CURRENT_BRANCH
+    echo "$ABS_PATH_TO_THIS_SCRIPT/release.sh -t $ALSO_TAG -r "/tmp/split/$lowercaseApp" -i"
+    bash $ABS_PATH_TO_THIS_SCRIPT/release.sh -t $ALSO_TAG -r "/tmp/split/$lowercaseApp" -i
+  fi
+
+  return 0
 
 #  git checkout -b $RANDOM_BRANCH
 #  git filter-repo --subdirectory-filter=$app --force
@@ -46,32 +98,17 @@ function split()
 #  git checkout $CURRENT_BRANCH
 }
 
-# allow overwriting REPOS from command line
-if [ -n "$1" ]; then
-  REPOS=$1
+echo "Releasing $REPOS"
+if [ $ALSO_TAG != 0 ]; then
+  echo "Also tagging with $ALSO_TAG"
 fi
 
 
-
 #git pull origin $CURRENT_BRANCH
-
+echo "REPOS: $REPOS"
 for app in $REPOS; do
   lowercaseApp=$(echo "$app" | tr '[:upper:]' '[:lower:]')
   echo "Releasing $app git@github.com:larawelp/$lowercaseApp.git"
   echo "Splitting $app"
-  split $app $lowercaseApp
+  split $app $lowercaseApp || true
 done
-
-#remote contracts git@github.com:larawelp/contracts.git
-#remote framework git@github.com:larawelp/framework.git
-#remote options git@github.com:larawelp/options.git
-#remote pagination git@github.com:larawelp/pagination.git
-#remote support git@github.com:larawelp/support.git
-#remote theme git@github.com:larawelp/theme.git
-#
-#split 'contracts' contracts
-#split 'framework' framework
-#split 'options' options
-#split 'pagination' pagination
-#split 'support' support
-#split 'theme' theme
