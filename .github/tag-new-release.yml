@@ -1,0 +1,32 @@
+name: Tag new release in sub-repositories
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  split:
+    runs-on: ubuntu-22.04
+    name: Release new version
+    steps:
+      - name: Wait for split to be done
+        uses: lewagon/wait-on-check-action@v1.3.1
+        with:
+          ref: 0.x
+          check-name: 'Split'
+          repo-token: ${{ secrets.DEPLOY_TOKEN_SPLIT }}
+          wait-interval: 10
+
+      - uses: actions/checkout@v3
+        with:
+          token:  ${{ secrets.DEPLOY_TOKEN_SPLIT }}
+          fetch-depth: 0
+
+      - name: Run tag command
+        run: bash bin/release.sh
+        shell: bash
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          DEPLOY_TOKEN_SPLIT: ${{ secrets.DEPLOY_TOKEN_SPLIT }}

@@ -1,5 +1,7 @@
 A simple framework for creating WordPress options page.
 
+May be easily used in LaraWelP themes.
+
 #Basic Usage
 
 Here is an example for creating an options page.

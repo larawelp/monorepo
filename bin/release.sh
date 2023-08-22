@@ -27,39 +27,48 @@ while getopts ":r:t:i:m" option; do
    esac
 done
 
-# ask user if the split command has been run, if not, exit
-hasRunSplit=0
-validInput=0
 
-while [ $validInput == 0 ]
-do
-  echo "Did you run the split command? (y/n)"
-  read -r -n 1 -s hasRunSplit
-  if [[ $hasRunSplit == "y" ]]; then
-    hasRunSplit=1
-    validInput=1
-  fi
-  if [[ $hasRunSplit == "n" ]]; then
-    hasRunSplit=0
-    validInput=1
-  fi
-done
-
-if [[ $hasRunSplit == 0 ]]; then
-  echo "Please run the split command first."
-  exit 1
-fi
 
 # get absolute path to this script's directory
 ABS_PATH_TO_THIS_SCRIPT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+if [ -n "$GITHUB_REF_NAME" ]; then
+  VERSION=$GITHUB_REF_NAME
+
+else
+
+  # ask user if the split command has been run, if not, exit
+  hasRunSplit=0
+  validInput=0
+
+  while [ $validInput == 0 ]
+  do
+    echo "Did you run the split command? (y/n)"
+    read -r -n 1 -s hasRunSplit
+    if [[ $hasRunSplit == "y" ]]; then
+      hasRunSplit=1
+      validInput=1
+    fi
+    if [[ $hasRunSplit == "n" ]]; then
+      hasRunSplit=0
+      validInput=1
+    fi
+  done
+
+  if [[ $hasRunSplit == 0 ]]; then
+    echo "Please run the split command first."
+    exit 1
+  fi
+
+  echo "Releasing a minor version ?: $IS_MINOR"
+
+fi
 
 # if VERSION is 0, exit with error
 if [ $VERSION == 0 ]; then
   echo "Error: No version specified"
   exit 1
 fi
-
-echo "Releasing a minor version ?: $IS_MINOR"
 
 #echo $VERSION;
 #echo $REPO_PATH;
@@ -68,6 +77,13 @@ echo "Releasing a minor version ?: $IS_MINOR"
 #exit 0;
 
 RELEASE_BRANCH="0.x"
+
+if [ -n "$GITHUB_REF_NAME" ]; then
+  # fetch $RELEASE_BRANCH from origin and check it out
+  git fetch origin $RELEASE_BRANCH
+  git checkout $RELEASE_BRANCH
+fi
+
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
 # Make sure current branch and release branch match.
@@ -109,32 +125,32 @@ fi
 
 UPDATE_FRAMEWORK=0
 
-#echo $VERSION;
-#exit 0;
-
-# Tag Framework
-tagExists=$(git tag --list | grep $VERSION | wc -l | xargs)
-echo "Tag exists: $tagExists"
-if [[ $tagExists == 1 ]]; then
-  echo "Tag $VERSION exists, checking if it is the same"
-  numberOfChanges=$(git diff $RELEASE_BRANCH..refs/tags/$VERSION | wc -l | xargs)
-  echo "Number of changes: $numberOfChanges"
-  if [[ $numberOfChanges == 0 ]]; then
-    echo -e "\e[32mTag $VERSION already exists and there are no changes in current branch VS remote tag. Skipping...\e[0m"
+# if we do not have $GITHUB_REF_NAME, echo "do ref"
+if [[ -z "$GITHUB_REF_NAME" ]]; then
+  # Tag Framework
+  tagExists=$(git tag --list | grep $VERSION | wc -l | xargs)
+  echo "Tag exists: $tagExists"
+  if [[ $tagExists == 1 ]]; then
+    echo "Tag $VERSION exists, checking if it is the same"
+    numberOfChanges=$(git diff $RELEASE_BRANCH..refs/tags/$VERSION | wc -l | xargs)
+    echo "Number of changes: $numberOfChanges"
+    if [[ $numberOfChanges == 0 ]]; then
+      echo -e "\e[32mTag $VERSION already exists and there are no changes in current branch VS remote tag. Skipping...\e[0m"
+    fi
+    if [[ $numberOfChanges != 0 ]]; then
+      git push --delete origin $VERSION || echo "Tag does not exist on origin."
+      # delete tag locally
+      git tag -d $VERSION || echo "Tag does not exist locally."
+      git tag $VERSION
+      git push origin --tags
+    fi
   fi
-  if [[ $numberOfChanges != 0 ]]; then
-    git push --delete origin $VERSION || echo "Tag does not exist on origin."
-    # delete tag locally
-    git tag -d $VERSION || echo "Tag does not exist locally."
+
+  # for now always tag the framework
+  if [[ $tagExists == 0 ]]; then
     git tag $VERSION
     git push origin --tags
   fi
-fi
-
-# for now always tag the framework
-if [[ $tagExists == 0 ]]; then
-  git tag $VERSION
-  git push origin --tags
 fi
 
 #if [[ $tagExists == 0 ]]; then
@@ -164,7 +180,11 @@ do
     echo "Releasing $REMOTE";
 
     TMP_DIR="/tmp/larawelp-split"
-    REMOTE_URL="git@github.com:larawelp/$lowercaseRemote.git"
+    if [[ -z "$GITHUB_REF_NAME" ]]; then
+      REMOTE_URL="git@github.com:larawelp/$lowercaseRemote.git"
+    else
+      REMOTE_URL="https://$DEPLOY_TOKEN_SPLIT@github.com/larawelp/$lowercaseRemote.git"
+    fi
 
     rm -rf $TMP_DIR;
     mkdir $TMP_DIR;
