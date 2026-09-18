@@ -16,4 +16,9 @@ php tests/compatibility/run.php /absolute/path/to/isolated/vendor/autoload.php
 
 Checks cover provider registration, WordPress Blade directives and escaping, WordPress conditional routing, restoration of Laravel validators on success and failure, ordinary Laravel routes, deferred WordPress template handling, console construction, and official MCP HTTP initialize/discovery/tool calls. MCP checks run only when that package is installed; Laravel 10 cannot load it.
 
+Folio 1.2 is installed in the fixture. Its real public handler is exercised through
+the WordPress fallback controller: page rendering, dynamic parameters, redirects,
+JSON, streaming, authorization errors, registration callbacks, WordPress precedence
+and missing/disabled page fallbacks.
+
 `composer.json` uses a relative path repository back to the monorepo. Generated vendor and lock files are intentionally ignored. The post-autoload script exercises the WordPress/Laravel translation-helper compatibility patch.

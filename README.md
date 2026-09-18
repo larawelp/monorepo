@@ -16,6 +16,13 @@ The core WordPress bridge does not require Corcel, Folio, or Horizon:
 
 These remain explicit dependencies of the bundled Theme starter, preserving its existing features. Decoupling them from Foundation allows other WordPress/Laravel applications to upgrade the bridge without inheriting unrelated application dependencies. The bundled Theme starter uses the configured Corcel fork; choose a revision that supports your target Laravel version.
 
+Folio integration uses `FolioManager::handle()` and supports redirects, JSON and
+streamed responses as well as HTML. Register page mounts with
+`WhenFolioRegisters::provide(...)` (`LaraWelP\Foundation\Events`), as in the Theme
+starter; the event is `larawelp.register.folio`, not `register.folio`.
+WordPress routes retain precedence, and unmatched Folio pages preserve the original
+WordPress 404 response.
+
 ### Existing applications
 
 Keep your application's existing kernel/provider layout. Upgrade the framework and application dependencies together; merely widening LaraWelP's version constraint does not upgrade an application.

@@ -83,6 +83,57 @@ $callback = end($GLOBALS['wp_filters']['template_include']);
 check($callback('/fixture/theme/other.php') === '/fixture/theme/other.php' && $handled === null, 'Unrelated WordPress templates are preserved');
 check($callback('/fixture/theme/index.php') === '/fixture/theme/index.php' && $handled->getContent() === 'Laravel route', 'WordPress template callback dispatches Laravel response');
 
+if (class_exists(Laravel\Folio\FolioManager::class)) {
+    $app->register(Laravel\Folio\FolioServiceProvider::class);
+    mkdir($base.'/routes', 0777, true);
+    mkdir($base.'/pages/people', 0777, true);
+    file_put_contents($base.'/routes/wp.php', '<?php // WordPress fixture routes were registered by the test.');
+    file_put_contents($base.'/pages/hello.blade.php', 'Hello from Folio');
+    file_put_contents($base.'/pages/people/[name].blade.php', 'Hello {{ $name }}');
+    file_put_contents($base.'/pages/redirect.blade.php', '<?php Laravel\Folio\render(fn () => redirect("/destination")); ?>');
+    file_put_contents($base.'/pages/json.blade.php', '<?php Laravel\Folio\render(fn () => response()->json(["folio" => true])); ?>');
+    file_put_contents($base.'/pages/stream.blade.php', '<?php Laravel\Folio\render(fn () => response()->stream(fn () => print("stream fixture"))); ?>');
+    file_put_contents($base.'/pages/forbidden.blade.php', '<?php Laravel\Folio\render(fn () => abort(403)); ?>');
+    $app['router']->middlewareGroup('web', []);
+    $wpFixture = new WpRouter(app('events'), $app);
+    $wpStatus = 404;
+    $wpFixture->home(fn () => response('WordPress fallback', $GLOBALS['wpStatus']));
+    $app->instance('wpRouter', $wpFixture);
+    $registrations = 0;
+    LaraWelP\Foundation\Events\WhenFolioRegisters::provide(function () use ($base, &$registrations) {
+        $registrations++;
+        app(Laravel\Folio\FolioManager::class)->registerRoute($base.'/pages', '/', [], null);
+    });
+    $folio = function (string $uri) use ($app) {
+        $app->instance(Laravel\Folio\FolioManager::class, new Laravel\Folio\FolioManager);
+        $request = Request::create($uri);
+        $route = new Route('GET', '/{fallbackPlaceholder}', fn () => null);
+        $request->setRouteResolver(fn () => $route);
+        $app->instance('request', $request);
+        Facade::clearResolvedInstance('request');
+        return (new LaraWelP\Foundation\Routing\WpRouteController)->dispatch($request);
+    };
+    check($folio('/hello')->getContent() === 'Hello from Folio', 'Folio public handler renders a page after WordPress returns 404');
+    check($registrations === 1, 'Folio registration event invokes registered listeners');
+    check($folio('/people/Filip')->getContent() === 'Hello Filip', 'Folio dynamic page parameters are preserved');
+    $redirect = $folio('/redirect');
+    check($redirect->getStatusCode() === 302 && str_ends_with($redirect->headers->get('Location'), '/destination'), 'Folio redirect responses are returned');
+    check($folio('/json')->getData(true) === ['folio'=>true], 'Folio JSON responses are returned');
+    $stream = $folio('/stream');
+    ob_start(); $stream->sendContent(); $streamBody = ob_get_clean();
+    check($streamBody === 'stream fixture', 'Folio streamed responses are returned');
+    check($folio('/forbidden')->getStatusCode() === 403, 'Folio authorization errors are not converted to WordPress 404');
+    $missing = $folio('/missing-page');
+    check($missing->getStatusCode() === 404 && $missing->getContent() === 'WordPress fallback', 'Unmatched Folio pages preserve the original WordPress 404 response');
+    $before = $registrations;
+    $wpStatus = 200;
+    check($folio('/hello')->getContent() === 'WordPress fallback' && $registrations === $before, 'Successful WordPress routes take precedence over Folio');
+    $wpStatus = 404;
+    config(['larawelp.enable_folio_integration'=>false]);
+    check($folio('/hello')->getStatusCode() === 404 && $registrations === $before, 'Disabled Folio preserves WordPress 404 without registration');
+    config(['larawelp.enable_folio_integration'=>true]);
+}
+
 if (class_exists(Laravel\Mcp\Server::class)) {
     $app->register(Laravel\Mcp\Server\McpServiceProvider::class);
     class CompatibilityTool extends Laravel\Mcp\Server\Tool {

@@ -5,6 +5,7 @@
     "require": {
         "php": "^8.3",
         "laravel/framework": "^13.0",
+        "laravel/folio": "^1.2",
         "laravel/mcp": "^1.0",
         "larawelp/all": "@dev"
     },
