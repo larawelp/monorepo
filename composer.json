@@ -6,19 +6,39 @@
             "email": "filip@pacurar.dev"
         }
     ],
-    "require": {},
+    "require": {
+        "php": "^8.1",
+        "laravel/framework": "^10.0 || ^11.0 || ^12.0 || ^13.0"
+    },
     "replace": {
         "larawelp/contracts": "self.version",
         "larawelp/options": "self.version",
         "larawelp/pagination": "self.version",
-        "larawelp/support": "self.version"
+        "larawelp/support": "self.version",
+        "larawelp/foundation": "self.version"
     },
     "autoload": {
         "psr-4": {
-            "LaraWelP\\": "./"
+            "LaraWelP\\Contracts\\": "Contracts/",
+            "LaraWelP\\Foundation\\": "Foundation/",
+            "LaraWelP\\Options\\": "Options/",
+            "LaraWelP\\Pagination\\": "Pagination/",
+            "LaraWelP\\Support\\": "Support/"
         },
         "files": [
             "./Foundation/helpers.php"
+        ],
+        "exclude-from-classmap": [
+            "/tests/",
+            "/Theme/",
+            "/vendor/"
         ]
+    },
+    "description": "WordPress integration for Laravel.",
+    "license": "MIT",
+    "suggest": {
+        "jgrossi/corcel": "Required only when using the Eloquent queriedModels macro.",
+        "laravel/folio": "Optional file-based page routing.",
+        "laravel/horizon": "Optional Redis queue dashboard."
     }
 }

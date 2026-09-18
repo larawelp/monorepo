@@ -1,0 +1,31 @@
+{
+    "name": "larawelp/compatibility-tests",
+    "description": "Isolated Laravel compatibility tests; no WordPress database or application credentials.",
+    "license": "MIT",
+    "require": {
+        "php": "^8.3",
+        "laravel/framework": "^13.0",
+        "laravel/mcp": "^1.0",
+        "larawelp/all": "@dev"
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../..",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": false
+    },
+    "scripts": {
+        "test": "@php run.php",
+        "post-autoload-dump": [
+            "LaraWelP\\Foundation\\ComposerScripts::renameHelperFunctions"
+        ]
+    }
+}

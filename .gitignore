@@ -1,1 +1,3 @@
 /vendor/
+/tests/compatibility/vendor/
+/tests/compatibility/composer.lock

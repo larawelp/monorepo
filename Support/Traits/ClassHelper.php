@@ -16,7 +16,7 @@ trait ClassHelper
         array $propertiesMap,
         array $whiteListProperties,
         array $requiredProperties = [],
-        callable $errorMessage = null
+        ?callable $errorMessage = null
     ) {
         foreach ($requiredProperties as $requiredProperty) {
             if (!array_key_exists($requiredProperty, $propertiesMap)) {

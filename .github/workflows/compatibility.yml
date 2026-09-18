@@ -1,0 +1,36 @@
+name: Laravel compatibility
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  compatibility:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { php: '8.2', laravel: '^12.41.1' }
+          - { php: '8.3', laravel: '^13.0' }
+          - { php: '8.4', laravel: '^13.0' }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, dom, curl
+          tools: composer:v2
+          coverage: none
+      - name: Select test runtime
+        working-directory: tests/compatibility
+        run: composer require --no-update 'php:^8.2' 'laravel/framework:${{ matrix.laravel }}'
+      - name: Install isolated test dependencies
+        working-directory: tests/compatibility
+        run: composer update --no-interaction --prefer-dist
+      - name: Test WordPress bridge and official MCP transport
+        working-directory: tests/compatibility
+        run: composer test
